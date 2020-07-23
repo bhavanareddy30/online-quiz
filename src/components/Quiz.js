@@ -8,7 +8,7 @@ import { observer } from 'mobx-react'
 class Quiz extends Component {
   componentDidMount() {
     this.props.store.setLoader(true);
-    fetch("http://e818f2635338.ngrok.io/quiz/questions")
+    fetch("https://e818f2635338.ngrok.io/quiz/questions")
       .then(res => res.json())
       .then(
         (result) => {

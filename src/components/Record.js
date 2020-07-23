@@ -49,7 +49,7 @@ export class Record extends Component {
         contentType: false
       };
       
-      fetch('http://e818f2635338.ngrok.io/quiz/saveAnswers', requestOptions)
+      fetch('https://e818f2635338.ngrok.io/quiz/saveAnswers', requestOptions)
         .then(response => response.json())
         .then(data => {
           this.state.currentNav === 'next' ? this.nextQuestion() : this.props.store.currentQuestionIdx === 0  ? this.endQuiz() : this.prevQuestion();
