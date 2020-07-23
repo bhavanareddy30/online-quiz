@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import Loader from 'react-loaders';
-import {Recorder} from 'react-voice-recorder'
+import {Recorder} from '../models/customRecorder/voiceRecorder'
 import 'react-voice-recorder/dist/index.css'
+var recognition;
 
 export class Record extends Component {
     constructor(props) {
       super(props);
       this.state = {
+        text: "",
         record: false,
         currentNav: '',
         audioDetails: {
@@ -24,9 +26,15 @@ export class Record extends Component {
       this.postToServer = this.postToServer.bind(this)
     }
     componentDidMount(){
-      // this.startRecording();
+      try {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+      }
+      catch(e) {
+        console.error(e);
+        alert("Your browser won't support speech-to-text conversion");
+      }
     }
-   
     startRecording = () => {
       this.setState({ record: true });
     }
@@ -49,13 +57,11 @@ export class Record extends Component {
         contentType: false
       };
       
-      fetch('https://e818f2635338.ngrok.io/quiz/saveAnswers', requestOptions)
+      fetch('https://2522e91dd2f5.ngrok.io/quiz/saveAnswers', requestOptions)
         .then(response => response.json())
         .then(data => {
-          this.state.currentNav === 'next' ? this.nextQuestion() : this.props.store.currentQuestionIdx === 0  ? this.endQuiz() : this.prevQuestion();
           this.props.store.setLoader(false);
         },(error) => {
-          this.state.currentNav === 'next' ? this.nextQuestion() : this.props.store.currentQuestionIdx === 0 ? this.endQuiz() : this.prevQuestion();
           this.props.store.setLoader(false);
         })
         
@@ -101,23 +107,38 @@ export class Record extends Component {
       }
       this.setState({ audioDetails: reset });
     }
-
+    handleStart(){
+      var that = this;
+      recognition.start();
+      recognition.onresult = function(event) {
+        var current = event.resultIndex;
+        var transcript = event.results[current][0].transcript;
+        var mobileRepeatBug = (current == 1 && transcript == event.results[0][0].transcript);
+        var noteContent='';
+        if(!mobileRepeatBug) {
+          noteContent += transcript;
+          that.setState({text: noteContent});
+        }
+      };
+      
+    }
     render() {
+      console.log(".."+this.state.text)
       return (
         <div>
           <div className={`${this.props.store.loading ? "" : "hidden"} fade-bg`}>
               <Loader type="ball-scale-multiple" />
           </div>
-
-        <div style={{width: '35%', margin: '10px auto'}}><Recorder
-          title={"To start recording your answer, please click on the mic symbol!"}
-          audioURL={this.state.audioDetails.url}
-          showUIAudio
-          handleAudioStop={data => this.handleAudioStop(data)}
-          handleOnChange={(value) => this.handleOnChange(value, 'firstname')}
-          handleAudioUpload={data => this.handleAudioUpload(data)}
-          handleRest={() => this.handleRest()} /></div>
-
+        <div style={{width: '35%', margin: '10px auto'}}>
+          <Recorder
+            title={"To start recording your answer, please click on the mic symbol!"}
+            audioURL={this.state.audioDetails.url}
+            showUIAudio
+            handleStart={() => this.handleStart()}
+            handleAudioStop={data => this.handleAudioStop(data)}
+            handleAudioUpload={data => this.handleAudioUpload(data)}
+            handleRest={() => this.handleRest()} /></div>
+          <div><textarea value={this.state.text} rows={4} style={{width: '500px'}}/></div>
           <div style={{position: 'relative', marginTop: '30px'}}> 
                 <span style={{position: 'absolute', left: '35%'}} className='nav-btn' 
                   onClick={() => this.prevQuestion()}><span className='fa fa-chevron-circle-left' style={{color:'#30567A'}}/>{"  Previous"}</span>
