@@ -80,8 +80,10 @@ export class Record extends Component {
     }
    
     nextQuestion(){
-      this.postToServer(this.state.audioDetails)
-      // this.props.store.setQstnIdx(this.props.store.currentQuestionIdx + 1);
+      if(this.state.audioDetails.blob !== null)
+        this.postToServer(this.state.audioDetails)
+      else
+        this.props.store.setQstnIdx(this.props.store.currentQuestionIdx + 1);
     }
 
     prevQuestion(){

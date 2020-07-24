@@ -10,35 +10,41 @@ export class Summary extends Component {
   constructor(props){
     super(props);
     this.state = {
+      loading:false,
       answers: [
-        {
-          question: '',
-          response: null,
-          responseText: '',
-        }
+        // {
+        //   question: '',
+        //   response: null,
+        //   responseText: '',
+        // }
       ]
     }
   }
 
   componentDidMount() {
+    this.setState({loading: true});
     fetch("https://3e7a4b8f1aa9.ngrok.io/quiz/getAnswers?userId=User3")
       .then(res => res.json())
       .then(
         (result) => {
-          this.setState({answers: result})
+          this.setState({answers: result, loading: false})
         },
         (error) => {
+          this.setState({loading: false})
             alert("Failed to Fetch answers from server!");
         }
     )
   }
     
   render() {
-    console.log(".."+this.state.answers)
     var containerHeight = window.innerHeight - 40/100 + 'px';
     return (
       <div style={{height: containerHeight, overflowY: 'auto'}}>
-      {this.state.answers.length === 0 && (<div style={{textAlign: 'center', color: 'white', fontSize: '1.1rem', margin: '120px'}}>                
+      <div className={this.state.loading ? "" : "hidden"}>
+                <h2 className='loader-text'>Loading... Please Wait!</h2>
+                <Loader type="ball-scale-multiple" />
+            </div>
+      {!this.state.loading && this.state.answers.length === 0 && (<div style={{textAlign: 'center', color: 'white', fontSize: '1.1rem', margin: '120px'}}>                
         <div><img src={oops} className="App-logo" alt="logo" style={{width: '350px'}}/></div>
       It seems you haven't submitted any of your answers properly. Please go back to home page and take the quiz again! </div>) }
         { this.state.answers.length > 0 && <div style={{textAlign: 'center'}}><div><img src={thank} className="App-logo" alt="logo" style={{width: '175px'}}/></div>
