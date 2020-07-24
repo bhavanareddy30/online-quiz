@@ -160,6 +160,10 @@ var Recorder = /*#__PURE__*/function (_Component) {
   };
 
   _proto.handleRest = function handleRest() {
+    if(this.state.recording) {
+      alert("Please click on the stop button and then clear the recorded audio")
+      return;
+    };
     this.setState({
       time: {},
       seconds: 0,
@@ -228,7 +232,7 @@ var Recorder = /*#__PURE__*/function (_Component) {
       onClick: function onClick() {
         return _this4.props.handleAudioUpload(_this4.state.audioBlob);
       },
-      className: styles.btn + " " + styles.upload_btn
+      className: styles.btn + " upload-btn " + styles.upload_btn
     }, "Upload"), /*#__PURE__*/React__default.createElement("button", {
       onClick: function onClick() {
         return _this4.handleRest();

@@ -4,13 +4,13 @@ import '../styles/loaders.css'
 import { Record } from "./Record";
 import { Summary } from "./Summary";
 import { observer } from 'mobx-react'
-import banner from '../banner.svg';
 import queImg from '../que.svg';
+import learn from '../learn.svg';
 
 class Quiz extends Component {
   componentDidMount() {
     this.props.store.setLoader(true);
-    fetch("http://localhost:8081/quiz/questions")
+    fetch("https://3e7a4b8f1aa9.ngrok.io/quiz/questions")
       .then(res => res.json())
       .then(
         (result) => {
@@ -45,27 +45,24 @@ render() {
             <div className='quiz-container' style={{ width: windowWidth }}>
                 {(this.props.store.currentQuestionIdx + 1) > this.props.store.questions.length ? (
                     <div>
-                        <h2 style={{marginTop: '80px'}}> You're done with the Quiz! All your recordings are submitted successfully.</h2>
                         <Summary />
                     </div>
                 ) : (
                     <div>
-                        <div style={{textAlign: 'center'}}><img src={queImg} className="App-logo" alt="logo" style={{width: '250px'}}/></div>
+                        <div style={{textAlign: 'center'}}><img src={queImg} className="App-logo" alt="logo" style={{width: '175px'}}/></div>
                         <h2 style={{margin: '25px'}}>{"Q" + queNumber + ": " + this.props.store.questions[this.props.store.currentQuestionIdx].question}</h2>
                         <Record key={this.props.store.currentQuestionIdx} endQuiz={this.endQuiz}
                             question={this.props.store.questions[this.props.store.currentQuestionIdx]} store={this.props.store} />
                     </div>)}
+                    
                 
-                <div className='start-btn' onClick={() => this.endQuiz()}
-                    style={{ margin: '100px auto', border: '1px solid lightgray', color: 'black', background: 'none' }}> End Quiz! </div>
+                <div onClick={() => this.endQuiz()} className='home-btn'> <span className='fa fa-arrow-left' style={{paddingRight: '10px'}}/>Back to home </div>
             </div>) : !this.props.store.loading && this.props.store.quizStarted ? "" :
                     (<div>
-                        <div style={{textAlign: 'center'}}><img src={banner} className="App-logo" alt="logo" style={{width: '250px'}}/></div>
+                        <div style={{textAlign: 'center', margin: '20px'}}><img src={learn} className="App-logo" alt="logo" style={{width: '250px'}}/></div>
+                        <div style={{fontStyle: 'italic', color: 'white', textAlign: 'center', fontSize: '1.75rem'}}> Have a happy learning!</div>
                         <div className={`${this.props.store.loading && !this.props.store.quizStarted ? "hidden" : ""} start-btn`}
                         onClick={() => this.startQuiz()}>Start Quiz</div>
-                        <div className='center'>
-                            <span className='bold'>Note: </span> On starting the quiz, Recording starts automatically. Please answer the question and move onto the next question accordingly
-                        </div>
                     </div>)}
 
         </div>

@@ -20,7 +20,8 @@ export class Record extends Component {
             m: null,
             s: null
           }
-        }
+        },
+        postData: {}
       }
       this.onStop = this.onStop.bind(this)
       this.postToServer = this.postToServer.bind(this)
@@ -44,12 +45,12 @@ export class Record extends Component {
     }
 
     postToServer(recordedBlob){
-      // this.props.store.setLoader(true);
+      this.props.store.setLoader(true);
       var fd = new FormData();
       fd.append('fname', 'Audioresponse.wav');
       fd.append('data', recordedBlob.blob);
       fd.append('questionId', this.props.question.id);
-      fd.append('userId', 'User2');
+      fd.append('userId', 'User3');
       fd.append('responseText', this.state.text);
       const requestOptions = {
         method: 'POST',
@@ -57,9 +58,11 @@ export class Record extends Component {
         processData: false,
         contentType: false
       };
-      fetch('http://localhost:8081/quiz/saveAnswers', requestOptions)
+      fetch('https://3e7a4b8f1aa9.ngrok.io/quiz/saveAnswers', requestOptions)
         .then((response) => response.blob())
         .then(data => {
+          // this.nextQuestion();
+          this.props.store.setQstnIdx(this.props.store.currentQuestionIdx + 1);
           this.props.store.setLoader(false);
         },(error) => {
           this.props.store.setLoader(false);
@@ -77,7 +80,8 @@ export class Record extends Component {
     }
    
     nextQuestion(){
-      this.props.store.setQstnIdx(this.props.store.currentQuestionIdx + 1);
+      this.postToServer(this.state.audioDetails)
+      // this.props.store.setQstnIdx(this.props.store.currentQuestionIdx + 1);
     }
 
     prevQuestion(){
@@ -86,8 +90,10 @@ export class Record extends Component {
 
     handleAudioStop(data){
       console.log(data)
+      recognition.stop();
       this.setState({ audioDetails: data });
-      this.postToServer(data)
+
+      // this.postToServer(data)
     }
     handleAudioUpload(file) {
       console.log(file);
@@ -103,10 +109,12 @@ export class Record extends Component {
           s: null 
         }
       }
-      this.setState({ audioDetails: reset });
+      recognition.stop();
+      this.setState({ audioDetails: reset, text: "", record: false });
     }
     handleStart(){
       var that = this;
+      recognition.continuous = true;
       recognition.start();
       recognition.onresult = function(event) {
         var current = event.resultIndex;
@@ -115,13 +123,19 @@ export class Record extends Component {
         var noteContent='';
         if(!mobileRepeatBug) {
           noteContent += transcript;
-          that.setState({text: noteContent});
+          that.setState({text: that.state.text + " " + noteContent});
         }
       };
+      recognition.onstart = function() { 
+
+      }
+      
+      recognition.onspeechend = function() {
+
+      }
       
     }
     render() {
-      console.log(".."+this.state.text)
       return (
         <div>
           <div className={`${this.props.store.loading ? "" : "hidden"} fade-bg`}>
@@ -129,20 +143,26 @@ export class Record extends Component {
           </div>
         <div style={{width: '35%', margin: '10px auto'}}>
           <Recorder
-            title={"To start recording your answer, please click on the mic symbol!"}
+            title={"To start recording your answer, please click on the mic symbol"}
             audioURL={this.state.audioDetails.url}
             showUIAudio
             handleStart={() => this.handleStart()}
             handleAudioStop={data => this.handleAudioStop(data)}
             handleAudioUpload={data => this.handleAudioUpload(data)}
             handleRest={() => this.handleRest()} /></div>
-          <div><textarea value={this.state.text} rows={4} style={{width: '500px'}}/></div>
-          <div style={{position: 'relative', marginTop: '30px'}}> 
-                <span style={{position: 'absolute', left: '35%'}} className='nav-btn' 
-                  onClick={() => this.prevQuestion()}><span className='fa fa-chevron-circle-left' style={{color:'#30567A'}}/>{"  Previous"}</span>
-                <span style={{position: 'absolute', right: '35%'}} className='nav-btn' 
-                  onClick={() => this.nextQuestion()}>{"Next  "}<span className='fa fa-chevron-circle-right' style={{color:'#30567A'}}/> </span>
-          </div>
+          <div>
+              <textarea value={this.state.text} rows={5} className='text-input' onChange={(evt => this.setState({text: evt.target.value}))}
+                placeholder="Answer auto fills once you start talking for 5 - 10 secs!"/></div>
+          <div style={{position: 'absolute', left: '25%', top: '50%', fontSize: '2.25rem'}} className='nav-btn' 
+                  onClick={() => this.prevQuestion()}><span className='fa fa-chevron-circle-left' style={{color:'white'}}/></div>
+           <div style={{position: 'absolute', right: '25%', top: '50%', fontSize: '2.25rem'}} className='nav-btn' 
+                  onClick={() => this.nextQuestion()}><span className='fa fa-chevron-circle-right' style={{color:'white'}}/> </div>
+            <div style={{ margin: '3% auto 0% auto',width: '60%', textAlign: 'left'}}>
+              <div style={{fontSize: '0.9rem', padding: '5px 0px'}}><span style={{fontWeight: 'bold', fontStyle: 'italic', color: 'darkred'}}>For Submission: </span>Please click on the stop button, make sure you review your answer and then proceed to next question. If not, your answer will not be submitted!</div>
+              <div style={{fontSize: '0.9rem', padding: '5px 0px'}}> <span style={{fontWeight: 'bold', fontStyle: 'italic', color: 'darkred'}}>For Re-recording: </span> To re-record your answer, you can clear your answer using clear button and then proceed.</div>
+             </div>
+             {/* <div className='start-btn' onClick={() => this.postToServer(this.state.audioDetails)}
+                    style={{ margin: '100px auto', border: '1px solid lightgray', color: 'black', background: 'none' }}> Submit </div> */}
         </div>
       );
     }

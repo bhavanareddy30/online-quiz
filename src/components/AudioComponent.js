@@ -9,8 +9,7 @@ export class AudioComponent extends Component {
   }
 
   componentDidMount() {
-      console.log(this.props.answerId);
-    fetch("http://localhost:8081/quiz/getAnswerById?answerId="+this.props.answerId)
+    fetch("https://3e7a4b8f1aa9.ngrok.io/quiz/getAnswerById?answerId="+this.props.answerId)
       .then(res => res.blob())
       .then(
         (result) => {
