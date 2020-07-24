@@ -44,21 +44,21 @@ export class Record extends Component {
     }
 
     postToServer(recordedBlob){
-      this.props.store.setLoader(true);
+      // this.props.store.setLoader(true);
       var fd = new FormData();
       fd.append('fname', 'Audioresponse.wav');
       fd.append('data', recordedBlob.blob);
       fd.append('questionId', this.props.question.id);
       fd.append('userId', 'User2');
+      fd.append('responseText', this.state.text);
       const requestOptions = {
         method: 'POST',
         body: fd,
         processData: false,
         contentType: false
       };
-      
-      fetch('https://2522e91dd2f5.ngrok.io/quiz/saveAnswers', requestOptions)
-        .then(response => response.json())
+      fetch('http://localhost:8081/quiz/saveAnswers', requestOptions)
+        .then((response) => response.blob())
         .then(data => {
           this.props.store.setLoader(false);
         },(error) => {
@@ -87,11 +87,9 @@ export class Record extends Component {
     handleAudioStop(data){
       console.log(data)
       this.setState({ audioDetails: data });
-      debugger;
       this.postToServer(data)
     }
     handleAudioUpload(file) {
-      debugger;
       console.log(file);
     }
     handleRest(){

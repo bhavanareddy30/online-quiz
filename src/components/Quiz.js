@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Loader from 'react-loaders';
 import '../styles/loaders.css'
 import { Record } from "./Record";
+import { Summary } from "./Summary";
 import { observer } from 'mobx-react'
 import banner from '../banner.svg';
 import queImg from '../que.svg';
@@ -9,7 +10,7 @@ import queImg from '../que.svg';
 class Quiz extends Component {
   componentDidMount() {
     this.props.store.setLoader(true);
-    fetch("https://2522e91dd2f5.ngrok.io/quiz/questions")
+    fetch("http://localhost:8081/quiz/questions")
       .then(res => res.json())
       .then(
         (result) => {
@@ -43,7 +44,10 @@ render() {
             {this.props.store.quizStarted && !this.props.store.quizEnded ? (
             <div className='quiz-container' style={{ width: windowWidth }}>
                 {(this.props.store.currentQuestionIdx + 1) > this.props.store.questions.length ? (
-                    <h2 style={{marginTop: '80px'}}> You're done with the Quiz! All your recordings are submitted successfully.</h2>
+                    <div>
+                        <h2 style={{marginTop: '80px'}}> You're done with the Quiz! All your recordings are submitted successfully.</h2>
+                        <Summary />
+                    </div>
                 ) : (
                     <div>
                         <div style={{textAlign: 'center'}}><img src={queImg} className="App-logo" alt="logo" style={{width: '250px'}}/></div>
